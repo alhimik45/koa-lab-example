@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}Редактирование минерала{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-12">
+                <h1>Редактирование минерала</h1>
+            </div>
+        </div>
+        {% include 'form.html.twig' with {'url' : '/mineral/' ~ mineral.id, 'method': 'PUT'} %}
+    </div>
+{% endblock %}

@@ -1,0 +1,11 @@
+body {
+    padding-top: 68px;
+    font-family: Droid Sans Mono", serif;
+    background: url("/img/bg.png");
+}
+
+@media (min-width: 992px) {
+    body {
+        padding-top: 70px;
+    }
+}

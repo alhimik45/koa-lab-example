@@ -32,8 +32,12 @@
                                 </div>
                                 <div class="card-footer">
                                     <span style="font-size: x-small; " class="float-left"><a href="/mineral/{{ mineral.id }}/edit">Редактировать</a></span>
-                                    <span style="font-size: x-small; " class="float-right"><a href="/mineral/{{ mineral.id }}/delete">Удалить</a></span>
-                                </div>
+                                    <span style="font-size: x-small; " class="float-right">
+                                        <form method="post" action="/mineral/{{ mineral.id }}" style="display: inline;">
+                                            <input type="hidden" name="_method" value="DELETE"/>
+                                            <button type="sumbit" class="blink">Удалить</button>
+                                        </form></span>
+                                    </div>
                             </div>
                         </div>
                     {% endfor %}

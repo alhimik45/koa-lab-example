@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ mineral.name }}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-12">
+                <h1>{{ mineral.name }}<span style="font-size: small; "><a href="/mineral/{{ mineral.id }}/edit">(Редактировать)</a></span>
+                    <span style="font-size: small; ">
+                    <form method="post" action="/mineral/{{ mineral.id }}" style="display: inline;">
+                        <input type="hidden" name="_method" value="DELETE"/>
+                        <button type="sumbit" class="blink">(Удалить)</button>
+                    </form></span>
+                </h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                {% if !mineral.image_url.length %}
+                    <img class="img-fluid" src="{{ asset("img/placeholder.jpg") }}">
+                {% else %}
+                    <img class="img-fluid" src="{{ mineral.image_url }}">
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <p><b>Территории распространения: </b> {{ mineral.territories | default('Не указано') }}</p>
+                <p><b>Месторождения: </b> {{ mineral.fields | default('Не указано') }}</p>
+                <p><b>Входит в состав руды: </b> {{ mineral.ore | default('Не указано') }}</p>
+                <p><b>Исследователи: </b> {{ mineral.researchers | default('Не указано') }}</p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h5 class="text-center">Описание</h5>
+                <pre>{{ mineral.description }}</pre>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h5 class="text-center">Публикации</h5>
+                {% if !mineral.publications.length %}
+                    <p>Нет</p>
+                {% else %}
+                    <ul>
+                        {% for pub in mineral.publications %}
+                            <li>{{ pub.name }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

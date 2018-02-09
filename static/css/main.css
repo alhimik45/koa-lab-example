@@ -1,6 +1,6 @@
 body {
     padding-top: 68px;
-    font-family: Droid Sans Mono", serif;
+    font-family: "Droid Sans Mono", serif;
     background: url("/img/bg.png");
 }
 
@@ -8,4 +8,18 @@ body {
     body {
         padding-top: 70px;
     }
+}
+
+.blink {
+     background:none!important;
+     color:#007bff;
+     border:none; 
+     padding:0!important;
+     font: inherit;
+     /*border is optional*/
+     cursor: pointer;
+}
+.blink:hover {
+	 color:#0056b3;
+	text-decoration: underline;
 }

@@ -1,27 +1,27 @@
 <div class="row justify-content-center">
     <div class="col-md-7">
-        <form method="post" enctype="multipart/form-data" action="{{url}}">
+        <form method="post" action="{{url}}">
             <input type="hidden" name="_method" value="{{method}}"/>
             <div class="form-group">
                 <label for="name">Название</label>
                 <input type="text" class="form-control" id="name" name="name"
-                       value="{{ (mineral.name is defined) ? mineral.name : '' }}">
+                       value="{% if mineral and mineral.name %}{{ mineral.name }}{% endif %}">
             </div>
             <div class="form-group">
                 <label for="description">Описание</label>
                 <textarea class="form-control" id="description"
-                          name="description">{{ (mineral.description is defined) ? mineral.description : '' }}</textarea>
+                          name="description">{{ mineral and mineral.description ? mineral.description : '' }}</textarea>
             </div>
             <div class="form-group">
                 <label for="image_url">Адрес картинки</label>
                 <input type="text" class="form-control" id="image_url" name="image_url"
-                       value="{{ (mineral.image_url is defined) ? mineral.image_url : '' }}">
+                       value="{{ (mineral and mineral.image_url) ? mineral.image_url : '' }}">
             </div>
             <div class="form-group">
                 <label for="territories">Территории распространения</label>
                 <select class="custom-select" name="territory[]" id="territories" multiple>
                     {% for t in territories %}
-                        <option value="{{ t.id }}" {{ (mineral.territories is defined and t.id in mineral.territories) ? 'selected' : '' }} >{{ t.name }}</option>
+                        <option value="{{ t.id }}" {{ mineral and mineral.territories and mineral.territories.includes(t.id) and 'selected' }} >{{ t.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -29,7 +29,7 @@
                 <label for="fields">Месторождения</label>
                 <select class="custom-select" name="field[]" id="fields" multiple>
                     {% for f in fields %}
-                        <option value="{{ f.id }}" {{ (mineral.fields is defined and f.id in mineral.fields) ? 'selected' : '' }} >{{ f.name }}</option>
+                        <option value="{{ f.id }}" {{ mineral and mineral.fields and mineral.fields.includes(f.id) and 'selected' }} >{{ f.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -37,7 +37,7 @@
                 <label for="ore">Входит в состав руды</label>
                 <select class="custom-select" name="ore[]" id="ore" multiple>
                     {% for o in ore %}
-                        <option value="{{ o.id }}" {{ (mineral.ore is defined and o.id in mineral.ore) ? 'selected' : '' }} >{{ o.name }}</option>
+                        <option value="{{ o.id }}" {{ mineral and mineral.ore and mineral.ore.includes(o.id) and 'selected'}} >{{ o.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -45,7 +45,7 @@
                 <label for="researchers">Исследователи</label>
                 <select class="custom-select" name="researcher[]" id="researchers" multiple>
                     {% for r in researchers %}
-                        <option value="{{ r.id }}" {{ (mineral.researchers is defined and r.id in mineral.researchers) ? 'selected' : '' }} >{{ r.name }}</option>
+                        <option value="{{ r.id }}" {{ mineral.researchers and mineral.researchers.includes(r.id) and 'selected'  }} >{{ r.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -53,7 +53,7 @@
                 <label for="publications">Публикации</label>
                 <select class="custom-select" name="publication[]" id="publications" multiple>
                     {% for p in publications %}
-                        <option value="{{ p.id }}" {{ (mineral.publications is defined and p.id in mineral.publications) ? 'selected' : '' }} >{{ p.name }}</option>
+                        <option value="{{ p.id }}" {{ mineral.publications and mineral.publications.includes(p.id) and 'selected' }} >{{ p.name }}</option>
                     {% endfor %}
                 </select>
             </div>

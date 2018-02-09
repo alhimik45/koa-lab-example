@@ -9,6 +9,6 @@
                 <h1>Редактирование минерала</h1>
             </div>
         </div>
-        {% include 'form.html.twig' with {'url' : '/mineral/' ~ mineral.id, 'method': 'PUT'} %}
+        {% include 'form.html' with {'url' : '/mineral/' + mineral.id, 'method': 'PUT'} %}
     </div>
 {% endblock %}

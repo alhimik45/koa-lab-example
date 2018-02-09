@@ -3,9 +3,12 @@ const Koa = require('koa')
 const Router = require('koa-router')
 const serve = require('koa-static')
 const mysql = require('promise-mysql')
+const koaBody = require('koa-body')
 
 const koa = new Koa()
 const app = new Router();
+
+
 
 (async function() {
 	const conn =await mysql.createConnection({
@@ -17,12 +20,20 @@ const app = new Router();
 
 
 	koa.use(serve('./static'));
-
 	koa.use(views(__dirname + '/views', {
 		map: {
 			html: 'swig'
 		}
 	}))
+
+	koa.use(koaBody());
+	
+	koa.use(async (ctx, next) => {
+		if(ctx.request.body._method){
+			ctx.method = ctx.request.body._method
+		}
+		await next()
+	})
 
 	async function get_all(table_name)
 	{
@@ -38,15 +49,15 @@ const app = new Router();
 
 	async function get_related(table_name, id)
 	{
-		return await conn.query(`SELECT * FROM $table_name LEFT JOIN mineral_${table_name} ON ${table_name}.id = mineral_${table_name}.${table_name}_id WHERE mineral_${table_name}.mineral_id = ?`,[id])
+		return await conn.query(`SELECT * FROM ${table_name} LEFT JOIN mineral_${table_name} ON ${table_name}.id = mineral_${table_name}.${table_name}_id WHERE mineral_${table_name}.mineral_id = ?`,[id])
 	}
 
-	function idify(parr){
-		return (await parr).map(o => o.id)
+	function idify(arr){
+		return arr.map(o => o.id)
 	}
 
-	function stringify(parr){
-		return (await parr).join(', ')
+	function stringify(arr){
+		return arr.map(o => o.name).join(', ')
 	}
 
 	app.get('/mineral/new', async ctx => {
@@ -69,11 +80,11 @@ const app = new Router();
 	app.get('/mineral/:id/edit', async ctx => {
 		const id = ctx.params.id
 		const mineral = (await conn.query('SELECT * FROM mineral WHERE id = ?', [id]))[0]
-		mineral.territories = idify(get_related('territory', id))
-		mineral.fields = idify(get_related('field', id))
-		mineral.ore = idify(get_related('ore', id))
-		mineral.researchers = idify(get_related('researcher', id))
-		mineral.publications = idify(get_related('publication', id))
+		mineral.territories = idify( await get_related('territory', id))
+		mineral.fields = idify( await get_related('field', id))
+		mineral.ore = idify( await get_related('ore', id))
+		mineral.researchers = idify( await get_related('researcher', id))
+		mineral.publications = idify( await get_related('publication', id))
 		const territories = await get_all('territory')
 		const fields = await get_all('field')
 		const ore = await get_all('ore')
@@ -93,10 +104,10 @@ const app = new Router();
 	app.get('/mineral/:id', async ctx => {
 		const id = ctx.params.id
 		const mineral = (await conn.query('SELECT * FROM mineral WHERE id = ?', [id]))[0]
-		mineral.territories = stringify(get_related('territory', id))
-		mineral.fields = stringify(get_related('field', id))
-		mineral.ore = stringify(get_related('ore', id))
-		mineral.researchers = stringify(get_related('researcher', id))
+		mineral.territories = stringify(await get_related('territory', id))
+		mineral.fields = stringify(await get_related('field', id))
+		mineral.ore = stringify(await get_related('ore', id))
+		mineral.researchers = stringify(await get_related('researcher', id))
 		mineral.publications = await conn.query("SELECT * FROM publication LEFT JOIN mineral_publication ON publication.id = mineral_publication.publication_id WHERE mineral_publication.mineral_id = ?", [id])
 
 		await ctx.render('mineral.html', {mineral})
@@ -113,39 +124,42 @@ const app = new Router();
 		}
 	}
 
-	function reset_many(params, table_name, id)
+	async function reset_many(params, table_name, id)
 	{
 		await conn.query(`DELETE FROM mineral_${table_name} WHERE mineral_id = ?`, [id])
 		await insert_many(params, table_name, id)
 	}
 
 	app.post('/mineral', async ctx => {
-		const id = ctx.params.id
-		conn.beginTransaction(err => {
-			const r = await conn.query('INSERT INTO mineral(name, description, image_url) SET ? VALUES (?,?,?)', [ctx.params.name, ctx.params.description, ctx.params.image_url])
-			id = r.insertId
-			await insert_many(ctx.params, 'publication', id)
-			await insert_many(ctx.params, 'territory', id)
-			await insert_many(ctx.params, 'field', id)
-			await insert_many(ctx.params, 'ore', id)
-			await insert_many(ctx.params, 'researcher', id)
-			conn.commit(err => {
-				await ctx.redirect(`/mineral/${id}`)
+		await new Promise(function(resolve, reject) {
+			conn.beginTransaction(async err => {
+				const r = await conn.query('INSERT INTO mineral(name, description, image_url) VALUES (?,?,?)', [ctx.request.body.name, ctx.request.body.description, ctx.request.body.image_url])
+				const id = r.insertId
+				await insert_many(ctx.request.body, 'publication', id)
+				await insert_many(ctx.request.body, 'territory', id)
+				await insert_many(ctx.request.body, 'field', id)
+				await insert_many(ctx.request.body, 'ore', id)
+				await insert_many(ctx.request.body, 'researcher', id)
+				conn.commit(async err => {
+					resolve(await ctx.redirect(`/mineral/${id}`))
+				})
 			})
-		});
-	});
+		})
+	})
 
 	app.put('/mineral/:id', async ctx => {
 		const id = ctx.params.id
-		conn.beginTransaction(err => {
-			await conn.query('UPATE mineral SET name = ?, description = ?, image_url = ? WHERE id = ? ', [ctx.params.name, ctx.params.description, ctx.params.image_url, id])
-			reset_many(ctx.params, 'publication', id)
-			reset_many(ctx.params, 'territory', id)
-			reset_many(ctx.params, 'field', id)
-			reset_many(ctx.params, 'ore', id)
-			reset_many(ctx.params, 'researcher', id)
-			conn.commit(err => {
-				await ctx.redirect(`/mineral/${id}`)
+		await new Promise(function(resolve, reject) {
+			conn.beginTransaction(async err => {
+				await conn.query('UPDATE mineral SET name = ?, description = ?, image_url = ? WHERE id = ? ', [ctx.request.body.name, ctx.request.body.description, ctx.request.body.image_url, id])
+				reset_many(ctx.request.body, 'publication', id)
+				reset_many(ctx.request.body, 'territory', id)
+				reset_many(ctx.request.body, 'field', id)
+				reset_many(ctx.request.body, 'ore', id)
+				reset_many(ctx.request.body, 'researcher', id)
+				conn.commit(async err => {
+					resolve(await ctx.redirect(`/mineral/${id}`))
+				})
 			})
 		})
 	})

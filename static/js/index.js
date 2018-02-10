@@ -1,5 +1,6 @@
 $(async () => {
 	const delay = ms => new Promise(res => setTimeout(res, ms))
+	const tmpl = _.template($('#mineral-template').html())
 	
 	$("#minerals").on('click', '.del', async function() {
 		const id = $(this).data('id')
@@ -14,7 +15,6 @@ $(async () => {
 	
 	while(true){
 		const minerals = await $.get('/minerals')
-		const tmpl = _.template($('#mineral-template').html())
 		var result = tmpl({ minerals })
 		$("#minerals").html(result)
 		await delay(1000)

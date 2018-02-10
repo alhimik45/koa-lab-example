@@ -3,12 +3,16 @@
 {% block title %}Редактирование минерала{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-md-12">
-                <h1>Редактирование минерала</h1>
-            </div>
-        </div>
-        {% include 'form.html' with {'url' : '/mineral/' + mineral.id, 'method': 'PUT'} %}
-    </div>
+<div class="container">
+	<div class="row text-center">
+		<div class="col-md-12">
+			<h1>Редактирование минерала</h1>
+		</div>
+	</div>
+	{% include 'form.html' with {'url' : '/mineral/' + mineral.id, 'method': 'PUT'} %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="/js/form.js"></script>
 {% endblock %}

@@ -4,10 +4,10 @@ const Router = require('koa-router')
 const serve = require('koa-static')
 const mysql = require('promise-mysql')
 const koaBody = require('koa-body')
+const isajax = require('koa-isajax')
 
 const koa = new Koa()
 const app = new Router();
-
 
 
 (async function() {
@@ -34,6 +34,7 @@ const app = new Router();
 		}
 		await next()
 	})
+	koa.use(isajax())
 
 	async function get_all(table_name)
 	{
@@ -45,6 +46,10 @@ const app = new Router();
 		await ctx.render('index.html', {
 			minerals: await get_all('mineral')
 		})
+	})
+
+	app.get('/minerals', async ctx => {
+		ctx.body = await get_all('mineral')
 	})
 
 	async function get_related(table_name, id)
@@ -166,7 +171,11 @@ const app = new Router();
 
 	app.delete('/mineral/:id', async ctx => {
 		await conn.query('DELETE FROM mineral WHERE id = ?', [ctx.params.id])
-		await ctx.redirect(`/`)
+		if(!ctx.state.xhr)
+			await ctx.redirect(`/`)
+		else
+			ctx.body = null
+
 	});
 
 	koa.use(app.routes())

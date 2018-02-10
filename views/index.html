@@ -3,46 +3,53 @@
 {% block title %}Список минералов{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-md-12">
-                <h1>Список минералов</h1>
-            </div>
+<div class="container">
+    <div class="row text-center">
+        <div class="col-md-12">
+            <h1>Список минералов</h1>
         </div>
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="row">
-                    {% for mineral in minerals %}
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card h-100">
-                                <a href="#">
-                                    {% if !mineral.image_url.length %}
-                                        <img class="card-img-top" src="img/placeholder.jpg">
-                                    {% else %}
-                                        <img class="card-img-top" src="{{ mineral.image_url }}">
-                                    {% endif %}
-                                </a>
-                                <div class="card-body">
-                                    <h4 class="card-title">
-                                        <a href="/mineral/{{ mineral.id }}">{{ mineral.name }}</a>
-                                    </h4>
-                                    <p class="card-text">
-                                        {{ mineral.description }}
-                                    </p>
-                                </div>
-                                <div class="card-footer">
-                                    <span style="font-size: x-small; " class="float-left"><a href="/mineral/{{ mineral.id }}/edit">Редактировать</a></span>
-                                    <span style="font-size: x-small; " class="float-right">
-                                        <form method="post" action="/mineral/{{ mineral.id }}" style="display: inline;">
-                                            <input type="hidden" name="_method" value="DELETE"/>
-                                            <button type="sumbit" class="blink">Удалить</button>
-                                        </form></span>
-                                    </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="row" id="minerals">
+
             </div>
         </div>
     </div>
+</div>
+<script type="text/template" id="mineral-template">
+    <% minerals.forEach(mineral => { %>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100">
+                <a href="#">
+                    <% if(!mineral.image_url.length) { %>
+                        <img class="card-img-top" src="img/placeholder.jpg">
+                    <% } else { %>
+                        <img class="card-img-top" src="<%= mineral.image_url %>">
+                    <% } %>
+                </a>
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <a href="/mineral/{{ mineral.id }}"><%= mineral.name %></a>
+                    </h4>
+                    <p class="card-text">
+                        <%= mineral.description %>
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <span style="font-size: x-small;" class="float-left"><a href="/mineral/<%= mineral.id %>/edit">Редактировать</a></span>
+                    <span style="font-size: x-small;" class="float-right">
+                        <button type="sumbit" class="blink del" data-id="<%= mineral.id %>">Удалить</button>
+                    </div>
+            </div>
+        </div>
+    <% }) %>
+</script>
+
 {% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="/js/lodash.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
+{% endblock %}
+
